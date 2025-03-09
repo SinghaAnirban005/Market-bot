@@ -1,0 +1,54 @@
+{
+    "id": "f81b97e4-3f09-478d-b00f-08de3236ea37",
+    "version": "0.0.1",
+    "requiredApiVersion": "^1.44.0",
+    "iconFile": "icon.png",
+    "author": {
+        "name": "Anirban Singha",
+        "homepage": "https://github.com/SinghaAnirban005",
+        "support": "https://github.com/SinghaAnirban005"
+    },
+    "name": "Market-bot",
+    "nameSlug": "market-bot",
+    "classFile": "MarketBotApp.ts",
+    "description": "Analyze market trends",
+    "permissions": [
+        {
+            "name": "user.read"
+        },
+        {
+            "name": "user.write"
+        },
+        {
+            "name": "room.read"
+        },
+        {
+            "name": "room.write"
+        },
+        {
+            "name": "message.read"
+        },
+        {
+            "name": "message.write"
+        },
+        {
+            "name": "api"
+        },
+        {
+            "name": "networking"
+        },
+        {
+            "name": "threads.read"
+        },
+        {
+            "name": "upload.read"
+        },
+        {
+            "name": "persistence"
+        },
+        {
+            "name": "slashcommand"
+        }
+    ],
+    "implements": []
+}

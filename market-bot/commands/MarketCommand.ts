@@ -1,0 +1,54 @@
+import { ISlashCommand } from "@rocket.chat/apps-engine/definition/slashcommands";
+import { App } from "@rocket.chat/apps-engine/definition/App";
+import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
+import { IModify, IRead, IPersistence, IHttp } from "@rocket.chat/apps-engine/definition/accessors"
+import { IUser } from "@rocket.chat/apps-engine/definition/users";
+import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
+import { sendMessage } from "../utils/message";
+import { StockHandler } from "../lib/StockHandler";
+
+class MarketCommand implements ISlashCommand {
+    public command = "market"
+    public i18nParamsExample = '';
+    public i18nDescription = '';
+    public providesPreview: boolean = false
+    private readonly app: App
+
+    constructor(app: App){
+        this.app = app
+    }
+
+    public async executor(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp, persis: IPersistence): Promise<void> {
+
+        const params = context.getArguments()
+
+        const room: IRoom = context.getRoom()
+        const user: IUser = context.getSender()
+        const appUser = await this.app.getAccessors().reader.getUserReader().getAppUser(this.app.getID());
+
+        if (!params || params.length == 0) {
+            return this.notifyMessage(room, read, user, "At least one status argument is mandatory. A second argument can be passed as status text.");
+        }
+
+        const symbol = params[0]
+        const res = await StockHandler(http, read, symbol)
+        
+        if(appUser){
+            await sendMessage(modify, appUser, room, res)
+        }else {
+            this.app.getLogger().warn("App user not found. Message not sent.");
+        }
+
+    }
+
+
+    private async notifyMessage(room: IRoom, read: IRead, sender: IUser, message: string): Promise<void> {
+        const notifier = read.getNotifier();
+        const messageBuilder = notifier.getMessageBuilder();
+        messageBuilder.setText(message);
+        messageBuilder.setRoom(room);
+        return notifier.notifyUser(sender, messageBuilder.getMessage());
+     }
+}
+
+export { MarketCommand }
