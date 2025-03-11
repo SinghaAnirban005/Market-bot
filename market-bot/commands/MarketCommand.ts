@@ -6,6 +6,7 @@ import { IUser } from "@rocket.chat/apps-engine/definition/users";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { sendMessage } from "../utils/message";
 import { StockHandler } from "../lib/StockHandler";
+import { MarketPersistence } from "../persistence/persistence";
 
 class MarketCommand implements ISlashCommand {
     public command = "market"
@@ -30,8 +31,20 @@ class MarketCommand implements ISlashCommand {
             return this.notifyMessage(room, read, user, "At least one status argument is mandatory. A second argument can be passed as status text.");
         }
 
-        const symbol = params[0]
-        const res = await StockHandler(http, read, symbol)
+        const category = params[0]
+        const symbol = params[1]
+        let res: string = ''
+        if(category === "price"){
+            res = await StockHandler(http, read, symbol)
+        }
+
+        if(category === "stock"){
+            // Store the name of the equity in persistence
+            const stored = await MarketPersistence.storeUserWishlist(persis, room.id, user.id, category, {symbol: symbol, category: category})
+
+            const storedData = await MarketPersistence.getAllUserWatchList(read.getPersistenceReader())
+            console.log(storedData)
+        }
         
         if(appUser){
             await sendMessage(modify, appUser, room, res)
