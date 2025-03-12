@@ -40,7 +40,7 @@ class MarketCommand implements ISlashCommand {
             res = await StockHandler(http, read, symbol)
         }
 
-        if(category === "stock"){
+        else if(category === "stock"){
             // Store the name of the equity in persistence
             const stored = await MarketPersistence.storeUserWishlist(persis, room.id, user.id, category, {symbol: symbol, category: category})
 
@@ -48,11 +48,11 @@ class MarketCommand implements ISlashCommand {
             console.log(storedData)
         }
 
-        if(category === "crypto"){
+        else if(category === "crypto"){
             const stored = await MarketPersistence.storeUserWishlist(persis, room.id, user.id, category, {symbol: symbol, market: market, category: category})
         }
 
-        if(category === "watch"){
+        else if(category === "watch"){
             // For now i shall return the real-time prices of the saved equities
            const results = await WatchlistHandler(read, room, user.id, http)
         //    if(results.stocks.length > 0 && appUser){
@@ -60,6 +60,19 @@ class MarketCommand implements ISlashCommand {
         //    }
 
            // Similar needs to be done for forex and crypto currencies
+        }
+
+        else if(category === "schedule") {
+            await modify.getScheduler().scheduleRecurring({
+                id: 'stock-update-processor',
+                interval: '5 seconds',
+                data: {app: this.app}
+            })
+            res = `Started stock updates every 0.1 minutes.`;
+        }
+        else if(category === "stop") {
+            await modify.getScheduler().cancelJob('stock-update-processor');
+            res = 'Stopped stock updates.';
         }
         
         if(appUser){
