@@ -7,6 +7,7 @@ import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { sendMessage } from "../utils/message";
 import { StockHandler } from "../lib/StockHandler";
 import { MarketPersistence } from "../persistence/persistence";
+import { WatchlistHandler } from "../lib/WatchlistHandler";
 
 class MarketCommand implements ISlashCommand {
     public command = "market"
@@ -33,6 +34,7 @@ class MarketCommand implements ISlashCommand {
 
         const category = params[0]
         const symbol = params[1]
+        const market = params[2]
         let res: string = ''
         if(category === "price"){
             res = await StockHandler(http, read, symbol)
@@ -44,6 +46,20 @@ class MarketCommand implements ISlashCommand {
 
             const storedData = await MarketPersistence.getAllUserWatchList(read.getPersistenceReader())
             console.log(storedData)
+        }
+
+        if(category === "crypto"){
+            const stored = await MarketPersistence.storeUserWishlist(persis, room.id, user.id, category, {symbol: symbol, market: market, category: category})
+        }
+
+        if(category === "watch"){
+            // For now i shall return the real-time prices of the saved equities
+           const results = await WatchlistHandler(read, room, user.id, http)
+        //    if(results.stocks.length > 0 && appUser){
+        //         await sendMessage(modify, appUser, room, results.stocks) Here msg expects a string but is getting an object 
+        //    }
+
+           // Similar needs to be done for forex and crypto currencies
         }
         
         if(appUser){

@@ -32,6 +32,62 @@ export class MarketPersistence {
         }
     }
 
+    // public static async storeUserForexWishlist (
+    //     persistence: IPersistence,
+    //     roomId: string,
+    //     userId: string,
+    //     category: string,
+    //     data: any
+    // ): Promise<boolean> {
+    //     const associations: Array<RocketChatAssociationRecord> = [
+    //         new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'user-watchlist'),
+    //         new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, roomId),
+    //         new RocketChatAssociationRecord(RocketChatAssociationModel.USER, userId),
+    //         new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, category)
+    //     ]
+
+    //     try {
+    //         const dataToStore = {
+    //             ...data,
+    //             roomId,
+    //             userId
+    //         };
+    //         await persistence.createWithAssociations(dataToStore, associations);
+    //         return true;
+    //     } catch (error) {
+    //         console.warn('Failed to store user-watch data ', error);
+    //         return false;
+    //     }
+    // }
+
+    // public static async storeUserCryptoWishlist (
+    //     persistence: IPersistence,
+    //     roomId: string,
+    //     userId: string,
+    //     category: string,
+    //     data: any
+    // ): Promise<boolean> {
+    //     const associations: Array<RocketChatAssociationRecord> = [
+    //         new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'user-watchlist'),
+    //         new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, roomId),
+    //         new RocketChatAssociationRecord(RocketChatAssociationModel.USER, userId),
+    //         new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, category)
+    //     ]
+
+    //     try {
+    //         const dataToStore = {
+    //             ...data,
+    //             roomId,
+    //             userId
+    //         };
+    //         await persistence.createWithAssociations(dataToStore, associations);
+    //         return true;
+    //     } catch (error) {
+    //         console.warn('Failed to store user-watch data ', error);
+    //         return false;
+    //     }
+    // }
+
     public static async getAllUserWatchList(persistence: IPersistenceRead): Promise<Array<any>> {
         const associations: Array<RocketChatAssociationRecord> = [
             new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'user-watchlist'),
