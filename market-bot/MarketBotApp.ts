@@ -9,6 +9,7 @@ import { IConfigurationExtend } from '@rocket.chat/apps-engine/definition/access
 import { settings } from './settings/settings';
 import { stockUpdateScheduler } from './scheduler/StockScheduler';
 import { StartupType } from '@rocket.chat/apps-engine/definition/scheduler';
+// import { UIActionButtonContext } from '@rocket.chat/apps-engine/definition/ui';
 
 export class MarketBotApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -35,5 +36,10 @@ export class MarketBotApp extends App {
                 // }
             },
         ]);
+        // configuration.ui.registerButton({
+        //     actionId: 'my-action-id', // this identifies your button in the interaction event
+        //     labelI18n: 'Save', // key of the i18n string containing the name of the button
+        //     context: UIActionButtonContext.MESSAGE_ACTION, // the context in which the action button will be displayed on the UI. You can also try using another context to see where the button will be displayed.
+        // });
     }
 }

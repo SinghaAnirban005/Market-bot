@@ -8,6 +8,7 @@ import { sendMessage } from "../utils/message";
 import { StockHandler } from "../lib/StockHandler";
 import { MarketPersistence } from "../persistence/persistence";
 import { WatchlistHandler } from "../lib/WatchlistHandler";
+import { UIKitSurfaceType } from "@rocket.chat/apps-engine/definition/uikit";
 
 class MarketCommand implements ISlashCommand {
     public command = "market"
@@ -39,13 +40,126 @@ class MarketCommand implements ISlashCommand {
         if(category === "price"){
             res = await StockHandler(http, read, symbol)
         }
-
         else if(category === "stock"){
             // Store the name of the equity in persistence
-            const stored = await MarketPersistence.storeUserWishlist(persis, room.id, user.id, category, {symbol: symbol, category: category})
+            // const stored = await MarketPersistence.storeUserWishlist(persis, room.id, user.id, category, {symbol: symbol, category: category})
 
-            const storedData = await MarketPersistence.getAllUserWatchList(read.getPersistenceReader())
-            console.log(storedData)
+            // const storedData = await MarketPersistence.getAllUserWatchList(read.getPersistenceReader())
+            // console.log(storedData)
+
+            // Below i am demonstrating the modal view after instead of manually typing in command
+            await modify.getUiController().openSurfaceView(
+                {
+                  type: UIKitSurfaceType.MODAL, // type of ui - cb or modal
+                  title: { // title of the modal
+                    text: 'Configure Wishlist', // title text
+                    type: 'plain_text' },
+                  blocks: [{ // content of the modal
+                  type: 'actions', // type of the first block
+                  blockId: 'action_block_1',
+                    elements: [
+                        {
+                            type: 'static_select',
+                            actionId: 'select_action_1',
+                            blockId: 'select_block_1',
+                            appId: this.app.getID(),
+                            placeholder: {
+                                type: 'plain_text',
+                                text: 'Select domain'
+                            },
+                            options: [
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Stock'
+                                    },
+                                    value: 'stock'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Forex'
+                                    },
+                                    value: 'forex'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Crypto Currency'
+                                    },
+                                    value: 'crypto'
+                                },
+                            ]
+                        },
+                    ]
+                }, 
+                { // content of the modal
+                    type: 'actions', // type of the first block
+                    blockId: 'action_block_2',
+                      elements: [
+                        {
+                            type: 'static_select',
+                            actionId: 'select_action_2',
+                            blockId: 'select_block_2',
+                            appId: this.app.getID(),
+                            placeholder: {
+                                type: 'plain_text',
+                                text: 'Select equity'
+                            },
+                            options: [
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'IBM'
+                                    },
+                                    value: 'IBM'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Microsoft'
+                                    },
+                                    value: 'MSFT'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Apple'
+                                    },
+                                    value: 'AAPL'
+                                },
+                            ]
+                        }
+                      ]
+                  }, 
+                  {
+                    type: 'divider',
+                    blockId: 'divider_1',
+                  },
+                  {
+                    type: 'actions', // the action block
+                    appId: this.app.getID(),
+                    blockId: 'action_block_3',
+                    elements: [ // the elements parameter contains the action element details, in this case, a button element
+                        {
+                            type: 'button',
+                            actionId: 'button_action_3',
+                            appId: this.app.getID(),
+                            blockId: 'button_action_block_3',
+                            text: {
+                                type: 'plain_text',
+                                text: 'Save'
+                            },
+                            style: 'primary',
+                            value: 'Button element'
+                        }
+                    ]
+                },
+               ]
+              },
+                { triggerId: context.getTriggerId()! }, // like security measure - to show users the ui if users interacted with rc
+                context.getSender() // user that types the slash command
+              )
         }
 
         else if(category === "crypto"){
@@ -75,11 +189,11 @@ class MarketCommand implements ISlashCommand {
             res = 'Stopped stock updates.';
         }
         
-        if(appUser){
-            await sendMessage(modify, appUser, room, res)
-        }else {
-            this.app.getLogger().warn("App user not found. Message not sent.");
-        }
+        // if(appUser){
+        //     await sendMessage(modify, appUser, room, res)
+        // }else {
+        //     this.app.getLogger().warn("App user not found. Message not sent.");
+        // }
 
     }
 
@@ -94,3 +208,4 @@ class MarketCommand implements ISlashCommand {
 }
 
 export { MarketCommand }
+
