@@ -50,12 +50,14 @@ class MarketCommand implements ISlashCommand {
             // Below i am demonstrating the modal view after instead of manually typing in command
             await modify.getUiController().openSurfaceView(
                 {
-                  type: UIKitSurfaceType.MODAL, // type of ui - cb or modal
-                  title: { // title of the modal
-                    text: 'Configure Wishlist', // title text
-                    type: 'plain_text' },
-                  blocks: [{ // content of the modal
-                  type: 'actions', // type of the first block
+                  type: UIKitSurfaceType.MODAL,
+                  id: 'wishlist_modal',
+                  title: { 
+                    text: 'Configure Wishlist',
+                    type: 'plain_text' 
+                  },
+                  blocks: [{
+                  type: 'actions',
                   blockId: 'action_block_1',
                     elements: [
                         {
@@ -136,26 +138,35 @@ class MarketCommand implements ISlashCommand {
                     type: 'divider',
                     blockId: 'divider_1',
                   },
-                  {
-                    type: 'actions', // the action block
-                    appId: this.app.getID(),
-                    blockId: 'action_block_3',
-                    elements: [ // the elements parameter contains the action element details, in this case, a button element
-                        {
-                            type: 'button',
-                            actionId: 'button_action_3',
-                            appId: this.app.getID(),
-                            blockId: 'button_action_block_3',
-                            text: {
-                                type: 'plain_text',
-                                text: 'Save'
-                            },
-                            style: 'primary',
-                            value: 'Button element'
-                        }
-                    ]
-                },
-               ]
+                //   {
+                //     type: 'actions', // the action block
+                //     appId: this.app.getID(),
+                //     blockId: 'action_block_3',
+                //     elements: [ // the elements parameter contains the action element details, in this case, a button element
+                //         {
+                //             type: 'button',
+                //             actionId: 'save_wishlist_action',
+                //             appId: this.app.getID(),
+                //             blockId: 'button_action_block_3',
+                //             text: {
+                //                 type: 'plain_text',
+                //                 text: 'Save'
+                //             },
+                //             style: 'primary',
+                //             value: 'Button element'
+                //         }
+                //     ]
+                // },
+               ],
+               //@ts-ignore
+               submit: {
+                    type: 'button',
+                    text: {
+                        type: 'plain_text',
+                        text: 'Save'
+                    },
+                    style: 'primary'
+               }
               },
                 { triggerId: context.getTriggerId()! }, // like security measure - to show users the ui if users interacted with rc
                 context.getSender() // user that types the slash command

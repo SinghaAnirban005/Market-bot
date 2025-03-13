@@ -9,6 +9,16 @@ import { IConfigurationExtend } from '@rocket.chat/apps-engine/definition/access
 import { settings } from './settings/settings';
 import { stockUpdateScheduler } from './scheduler/StockScheduler';
 import { StartupType } from '@rocket.chat/apps-engine/definition/scheduler';
+import { pseudoRandomBytes } from 'crypto';
+import { IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IHttp } from '@rocket.chat/apps-engine/definition/accessors';
+import { IPersistence } from '@rocket.chat/apps-engine/definition/accessors';
+import { IModify } from '@rocket.chat/apps-engine/definition/accessors';
+import { UIKitViewSubmitInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+// import { ExecuteViewSubmitHandler } from './handlers/ExecuteViewSubmitHandler';
+import { UIKitBlockInteractionContext, IUIKitResponse } from '@rocket.chat/apps-engine/definition/uikit';
+import { ButtonActionHandler } from './handlers/ExecuteBlockSubmitHandler';
+import { WishlistViewSubmitHandler } from './handlers/ExecuteViewSubmitHandler';
 // import { UIActionButtonContext } from '@rocket.chat/apps-engine/definition/ui';
 
 export class MarketBotApp extends App {
@@ -41,5 +51,45 @@ export class MarketBotApp extends App {
         //     labelI18n: 'Save', // key of the i18n string containing the name of the button
         //     context: UIActionButtonContext.MESSAGE_ACTION, // the context in which the action button will be displayed on the UI. You can also try using another context to see where the button will be displayed.
         // });
+    }
+    // public async executeViewSubmitHandler(
+    //     context: UIKitViewSubmitInteractionContext,
+    //     read: IRead,
+    //     http: IHttp,
+    //     persistence: IPersistence,
+    //     modify: IModify,
+    // ) {
+    //     return new ExecuteViewSubmitHandler(
+    //         this,
+    //         read,
+    //         http,
+    //         persistence,
+    //         modify,
+    //         context,
+    //     ).executor();
+    // }
+
+    public async executeBlockActionHandler(context: UIKitBlockInteractionContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<IUIKitResponse> {
+        const data = context.getInteractionData();
+        
+        // Handle the button click
+        if (data.actionId === 'save_wishlist_action') {
+            const handler = new ButtonActionHandler(this, read, http, persistence, modify, context);
+            return await handler.executor();
+        }
+        
+        return context.getInteractionResponder().successResponse();
+    }
+
+    public async executeViewSubmitHandler(context: UIKitViewSubmitInteractionContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<IUIKitResponse> {
+        const data = context.getInteractionData();
+        
+        // Check the view ID
+        if (data.view.id === 'wishlist_modal') {
+            const handler = new WishlistViewSubmitHandler(this, read, http, persistence, modify, context);
+            return await handler.executor();
+        }
+        
+        return context.getInteractionResponder().successResponse();
     }
 }
