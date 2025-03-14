@@ -27,11 +27,31 @@ export const settings: ISetting[] = [
 		public: true,
 		packageValue: '',
 	},
+	{
+		id: 'LLM-api-key',
+		i18nLabel: 'LLM Api Key',
+		i18nDescription: 'Must be filled to get LLM output',
+		type: SettingType.STRING,
+		required: true,
+		public: true,
+		packageValue: '',
+	},
+	{
+		id: 'LLM-api-endpoint',
+		i18nLabel: 'LLM endpoint',
+		i18nDescription: 'Must be filled to get LLM output',
+		type: SettingType.STRING,
+		required: true,
+		public: true,
+		packageValue: '',
+	},
 ];
 
 export async function getAPIConfig(read: IRead) {
     const envReader = read.getEnvironmentReader().getSettings();
     return {
         apiKey: await envReader.getValueById("stock-api-key"),
+		LLMapiKey: await envReader.getValueById("LLM-api-key"),
+		LLMapiEndpoint: await envReader.getValueById('LLM-api-endpoint')
     };
 }

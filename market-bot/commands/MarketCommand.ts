@@ -8,7 +8,7 @@ import { sendMessage } from "../utils/message";
 import { StockHandler } from "../lib/StockHandler";
 import { MarketPersistence } from "../persistence/persistence";
 import { WatchlistHandler } from "../lib/WatchlistHandler";
-import { UIKitSurfaceType } from "@rocket.chat/apps-engine/definition/uikit";
+import { SummarizeTrends } from "../prompts/AssetTrend";
 
 class MarketCommand implements ISlashCommand {
     public command = "market"
@@ -202,6 +202,12 @@ class MarketCommand implements ISlashCommand {
         }
         else if(category === "remove"){
             await MarketPersistence.deleteAllUserWatchlist(persis)
+        }
+        else if(category === "trend"){
+            const response = await StockHandler(http, read, symbol)
+            this.app.getLogger().log("Response -> ", response)
+            const summary = await SummarizeTrends(response, read, http, symbol)
+            res = summary
         }
 
         
