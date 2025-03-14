@@ -8,8 +8,6 @@ import { MarketCommand } from './commands/MarketCommand';
 import { IConfigurationExtend } from '@rocket.chat/apps-engine/definition/accessors';
 import { settings } from './settings/settings';
 import { stockUpdateScheduler } from './scheduler/StockScheduler';
-import { StartupType } from '@rocket.chat/apps-engine/definition/scheduler';
-import { pseudoRandomBytes } from 'crypto';
 import { IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IHttp } from '@rocket.chat/apps-engine/definition/accessors';
 import { IPersistence } from '@rocket.chat/apps-engine/definition/accessors';
@@ -20,7 +18,6 @@ import { UIKitBlockInteractionContext, IUIKitResponse } from '@rocket.chat/apps-
 import { ButtonActionHandler } from './handlers/ExecuteBlockSubmitHandler';
 import { WishlistViewSubmitHandler } from './handlers/ExecuteViewSubmitHandler';
 // import { UIActionButtonContext } from '@rocket.chat/apps-engine/definition/ui';
-
 export class MarketBotApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
         super(info, logger, accessors);

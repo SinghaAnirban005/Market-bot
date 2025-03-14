@@ -101,6 +101,20 @@ export class MarketPersistence {
         }
     }
 
+    public static async deleteAllUserWatchlist(persistence: IPersistence): Promise<boolean>  {
+        const associations: Array<RocketChatAssociationRecord> = [
+            new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'user-watchlist'),
+        ]
+
+        try {
+            await persistence.removeByAssociations(associations)
+        } catch (error) {
+            console.warn(error)
+            return false
+        }
+        return true
+    }
+
     public static async getUserWatchListByCategory(category: string, persistence: IPersistenceRead, roomId: string, userId: string): Promise<Array<any>> {
         const associations: Array<RocketChatAssociationRecord> = [
             new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, roomId),

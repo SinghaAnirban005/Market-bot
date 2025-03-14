@@ -7,6 +7,7 @@ export async function sendMessage(
 	user: IUser,
 	room: IRoom,
 	message: string,
+	imageUrl?: string
 ): Promise<void> {
 	const messageBuilder = modify
 		.getCreator()
@@ -15,8 +16,33 @@ export async function sendMessage(
 		.setRoom(room)
 
 	if (message) {
-		messageBuilder.setText(message);
+		messageBuilder.setBlocks([
+			{
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: message,
+                }
+            },
+			// {
+            //     type: 'image',
+            //     imageUrl: imageUrl,
+            //     altText: 'test image'
+            // },
+		])
 	}
+	// } else if(message) {
+	// 	messageBuilder.setBlocks([
+	// 		{
+    //             type: 'section',
+    //             text: {
+    //                 type: 'plain_text',
+    //                 text: message,
+    //                 emoji: true
+    //             }
+    //         },
+	// 	])
+	// }
 
 	await modify.getCreator().finish(messageBuilder);
 	return;

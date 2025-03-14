@@ -32,7 +32,7 @@ export class WishlistViewSubmitHandler {
         this.app.getLogger().info('Selected Domain:', domainSelection);
         this.app.getLogger().info('Selected Equity:', equitySelection);
         
-        // Save to persistence if needed
+        // Saving the data to persistence
         // if (domainSelection && equitySelection) {
         //     await MarketPersistence.storeUserWishlist(
         //         this.persistence, 
