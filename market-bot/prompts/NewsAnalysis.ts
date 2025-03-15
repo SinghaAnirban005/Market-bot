@@ -1,28 +1,35 @@
 import { IHttp, IRead } from "@rocket.chat/apps-engine/definition/accessors";
 import { getAPIConfig } from "../settings/settings";
 
-// Function to summarize trends using the LLM API
-export async function SummarizeTrends(data: any, read: IRead, http: IHttp, symbol: string) {
-    // Fetch API configuration (key and endpoint)
+export async function SummarizeNews(data: any, read: IRead, http: IHttp, symbol: string) {
     const { LLMapiKey } = await getAPIConfig(read);
     const { LLMapiEndpoint } = await getAPIConfig(read);
 
-    const prompt = `
-You are a financial analyst tasked with analyzing intraday stock data for ${symbol} to identify trends, patterns, and potential trading opportunities. The data includes 5-minute intervals with open, high, low, close prices, and volume.
+    const feed = data.feed || []
 
-**Data Provided**:
-${data}
+    const reducedData = feed
+        .filter((item: any) =>
+            item.ticker_sentiment?.some((ticker: any) => ticker.ticker === symbol)
+        )
+        .map((item: any) => ({
+            title: item.title,
+            summary: item.summary.slice(0, 150),
+            ticker_sentiment: item.ticker_sentiment.filter((t: any) => t.ticker === symbol),
+        }))
+        .slice(0, 3);
 
-Analyze the provided intraday stock data for ${symbol} and provide a concise summary of the following:
-1. Trend Identification
-2. Volume Analysis
-3. Support and Resistance Levels
-4. Pattern Recognition
-5. Predictive Analysis
-6. Actionable Insights
+        console.log(reducedData)
 
-Do not include headers, explanations, or additional context. Provide only the analysis in a structured format.
-`;
+        const prompt = `
+        Summarize the following news data for ${symbol}:
+        ${JSON.stringify(reducedData)}
+        
+        Provide a concise summary focusing on:
+        1. Overall sentiment
+        2. Top news highlights (title, summary, sentiment, relevance)
+        3. Actionable insights
+        `;
+
     // Send the prompt to the LLM API
     const response = await http.post(LLMapiEndpoint, {
         headers: {
@@ -49,5 +56,6 @@ Do not include headers, explanations, or additional context. Provide only the an
     const stringifiedResponse = JSON.stringify(response);
     const response_data = JSON.parse(stringifiedResponse)
     const content = response_data.data.choices[0].message.content
+
     return content
 }

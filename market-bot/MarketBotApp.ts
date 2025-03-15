@@ -29,6 +29,7 @@ export class MarketBotApp extends App {
                 configuration.settings.provideSetting(setting)
             )
         );
+        
         configuration.slashCommands.provideSlashCommand(new MarketCommand(this));
 
         configuration.scheduler.registerProcessors([
@@ -38,7 +39,7 @@ export class MarketBotApp extends App {
                 // Optional: automatically start the processor during app startup
                 // startupSetting: {
                 //     type: StartupType.RECURRING,
-                //     interval: '0.1 minutes', // Adjust as needed
+                //     interval: '10 seconds',
                 //     data: { app: this }
                 // }
             },
@@ -81,7 +82,6 @@ export class MarketBotApp extends App {
     public async executeViewSubmitHandler(context: UIKitViewSubmitInteractionContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<IUIKitResponse> {
         const data = context.getInteractionData();
         
-        // Check the view ID
         if (data.view.id === 'wishlist_modal') {
             const handler = new WishlistViewSubmitHandler(this, read, http, persistence, modify, context);
             return await handler.executor();

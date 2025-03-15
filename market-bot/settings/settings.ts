@@ -11,12 +11,12 @@ export const settings: ISetting[] = [
 		i18nDescription: 'AI model to use summary.',
 		type: SettingType.SELECT,
 		values: [
-			{ key: 'GPT-4o', i18nLabel: 'GPT-4o' },
-			{ key: 'mistral-7b', i18nLabel: 'Mistral 7B' },
+			{ key: 'llama-3.3-70b-versatile', i18nLabel: 'llama-3.3-70b-versatile' },
+			{ key: 'deepseek-r1-distill-qwen-32b', i18nLabel: 'deepseek-r1-distill-qwen-32b' },
 		],
 		required: true,
 		public: true,
-		packageValue: 'GPT-4o',
+		packageValue: 'deepseek-r1-distill-qwen-32b',
 	},
 	{
 		id: 'stock-api-key',
@@ -50,6 +50,7 @@ export const settings: ISetting[] = [
 export async function getAPIConfig(read: IRead) {
     const envReader = read.getEnvironmentReader().getSettings();
     return {
+		model: await envReader.getValueById("model"),
         apiKey: await envReader.getValueById("stock-api-key"),
 		LLMapiKey: await envReader.getValueById("LLM-api-key"),
 		LLMapiEndpoint: await envReader.getValueById('LLM-api-endpoint')

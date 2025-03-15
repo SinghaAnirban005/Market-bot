@@ -1,7 +1,5 @@
 import { IPersistence, IPersistenceRead } from "@rocket.chat/apps-engine/definition/accessors";
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from "@rocket.chat/apps-engine/definition/metadata";
-import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
-import { IUser } from "@rocket.chat/apps-engine/definition/users";
 
 export class MarketPersistence {
     public static async storeUserWishlist (

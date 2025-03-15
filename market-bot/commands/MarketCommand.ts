@@ -9,6 +9,9 @@ import { StockHandler } from "../lib/StockHandler";
 import { MarketPersistence } from "../persistence/persistence";
 import { WatchlistHandler } from "../lib/WatchlistHandler";
 import { SummarizeTrends } from "../prompts/AssetTrend";
+import { UIKitSurfaceType } from "@rocket.chat/apps-engine/definition/uikit";
+import { NewsHandler } from "../lib/NewsHandler";
+import { SummarizeNews } from "../prompts/NewsAnalysis";
 
 class MarketCommand implements ISlashCommand {
     public command = "market"
@@ -37,11 +40,9 @@ class MarketCommand implements ISlashCommand {
         const symbol = params[1]
         const market = params[2]
         let res: string = ''
-        let img: string = ''
         if(category === "price"){
             const response = await StockHandler(http, read, symbol)
             res = response.formattedMarkdown
-            img = response.url
         }
         else if(category === "stock"){
             // Store the name of the equity in persistence
@@ -49,96 +50,96 @@ class MarketCommand implements ISlashCommand {
 
             const storedData = await MarketPersistence.getAllUserWatchList(read.getPersistenceReader())
             // Below i am demonstrating the modal view instead of manually typing in command
-            // await modify.getUiController().openSurfaceView(
-            //     {
-            //       type: UIKitSurfaceType.MODAL,
-            //       id: 'wishlist_modal',
-            //       title: { 
-            //         text: 'Configure Wishlist',
-            //         type: 'plain_text' 
-            //       },
-            //       blocks: [{
-            //       type: 'actions',
-            //       blockId: 'action_block_1',
-            //         elements: [
-            //             {
-            //                 type: 'static_select',
-            //                 actionId: 'select_action_1',
-            //                 blockId: 'select_block_1',
-            //                 appId: this.app.getID(),
-            //                 placeholder: {
-            //                     type: 'plain_text',
-            //                     text: 'Select domain'
-            //                 },
-            //                 options: [
-            //                     {
-            //                         text: {
-            //                             type: 'plain_text',
-            //                             text: 'Stock'
-            //                         },
-            //                         value: 'stock'
-            //                     },
-            //                     {
-            //                         text: {
-            //                             type: 'plain_text',
-            //                             text: 'Forex'
-            //                         },
-            //                         value: 'forex'
-            //                     },
-            //                     {
-            //                         text: {
-            //                             type: 'plain_text',
-            //                             text: 'Crypto Currency'
-            //                         },
-            //                         value: 'crypto'
-            //                     },
-            //                 ]
-            //             },
-            //         ]
-            //     }, 
-            //     { // content of the modal
-            //         type: 'actions', // type of the first block
-            //         blockId: 'action_block_2',
-            //           elements: [
-            //             {
-            //                 type: 'static_select',
-            //                 actionId: 'select_action_2',
-            //                 blockId: 'select_block_2',
-            //                 appId: this.app.getID(),
-            //                 placeholder: {
-            //                     type: 'plain_text',
-            //                     text: 'Select equity'
-            //                 },
-            //                 options: [
-            //                     {
-            //                         text: {
-            //                             type: 'plain_text',
-            //                             text: 'IBM'
-            //                         },
-            //                         value: 'IBM'
-            //                     },
-            //                     {
-            //                         text: {
-            //                             type: 'plain_text',
-            //                             text: 'Microsoft'
-            //                         },
-            //                         value: 'MSFT'
-            //                     },
-            //                     {
-            //                         text: {
-            //                             type: 'plain_text',
-            //                             text: 'Apple'
-            //                         },
-            //                         value: 'AAPL'
-            //                     },
-            //                 ]
-            //             }
-            //           ]
-            //       }, 
-            //       {
-            //         type: 'divider',
-            //         blockId: 'divider_1',
-            //       },
+            await modify.getUiController().openSurfaceView(
+                {
+                  type: UIKitSurfaceType.MODAL,
+                  id: 'wishlist_modal',
+                  title: { 
+                    text: 'Configure Wishlist',
+                    type: 'plain_text' 
+                  },
+                  blocks: [{
+                  type: 'actions',
+                  blockId: 'action_block_1',
+                    elements: [
+                        {
+                            type: 'static_select',
+                            actionId: 'select_action_1',
+                            blockId: 'select_block_1',
+                            appId: this.app.getID(),
+                            placeholder: {
+                                type: 'plain_text',
+                                text: 'Select domain'
+                            },
+                            options: [
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Stock'
+                                    },
+                                    value: 'stock'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Forex'
+                                    },
+                                    value: 'forex'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Crypto Currency'
+                                    },
+                                    value: 'crypto'
+                                },
+                            ]
+                        },
+                    ]
+                }, 
+                { // content of the modal
+                    type: 'actions',
+                    blockId: 'action_block_2',
+                      elements: [
+                        {
+                            type: 'static_select',
+                            actionId: 'select_action_2',
+                            blockId: 'select_block_2',
+                            appId: this.app.getID(),
+                            placeholder: {
+                                type: 'plain_text',
+                                text: 'Select equity'
+                            },
+                            options: [
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'IBM'
+                                    },
+                                    value: 'IBM'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Microsoft'
+                                    },
+                                    value: 'MSFT'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Apple'
+                                    },
+                                    value: 'AAPL'
+                                },
+                            ]
+                        }
+                      ]
+                  }, 
+                  {
+                    type: 'divider',
+                    blockId: 'divider_1',
+                  },
                 //   {
                 //     type: 'actions', // the action block
                 //     appId: this.app.getID(),
@@ -158,20 +159,20 @@ class MarketCommand implements ISlashCommand {
                 //         }
                 //     ]
                 // },
-        //        ],
-        //        //@ts-ignore
-        //        submit: {
-        //             type: 'button',
-        //             text: {
-        //                 type: 'plain_text',
-        //                 text: 'Save'
-        //             },
-        //             style: 'primary'
-        //        }
-        //       },
-        //         { triggerId: context.getTriggerId()! }, // like security measure - to show users the ui if users interacted with rc
-        //         context.getSender() // user that types the slash command
-        //       )
+               ],
+               //@ts-ignore
+               submit: {
+                    type: 'button',
+                    text: {
+                        type: 'plain_text',
+                        text: 'Save'
+                    },
+                    style: 'primary'
+               }
+              },
+                { triggerId: context.getTriggerId()! },
+                context.getSender()
+              )
         }
 
         else if(category === "crypto"){
@@ -208,11 +209,17 @@ class MarketCommand implements ISlashCommand {
             this.app.getLogger().log("Response -> ", response)
             const summary = await SummarizeTrends(response, read, http, symbol)
             res = summary
+        } else if(category === "news") {
+            const newsData = await NewsHandler(http, read, symbol)
+
+            const newsSummary = await SummarizeNews(newsData, read, http, symbol)
+            this.app.getLogger().log("News summary -> ", newsSummary)
+            res = newsSummary
         }
 
         
         if(appUser){
-            await sendMessage(modify, appUser, room, res, img)
+            await sendMessage(modify, appUser, room, res)
         }else {
             this.app.getLogger().warn("App user not found. Message not sent.");
         }

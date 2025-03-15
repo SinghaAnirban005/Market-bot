@@ -24,25 +24,8 @@ export async function sendMessage(
                     text: message,
                 }
             },
-			// {
-            //     type: 'image',
-            //     imageUrl: imageUrl,
-            //     altText: 'test image'
-            // },
 		])
 	}
-	// } else if(message) {
-	// 	messageBuilder.setBlocks([
-	// 		{
-    //             type: 'section',
-    //             text: {
-    //                 type: 'plain_text',
-    //                 text: message,
-    //                 emoji: true
-    //             }
-    //         },
-	// 	])
-	// }
 
 	await modify.getCreator().finish(messageBuilder);
 	return;

@@ -25,14 +25,12 @@ export class WishlistViewSubmitHandler {
         this.app.getLogger().info('View Submit Data:', data);
         const { user, room, view } = data;
         
-        // Extract form values from state
         const domainSelection = view.state?.['select_block_1']?.['select_action_1'];
         const equitySelection = view.state?.['select_block_2']?.['select_action_2'];
         
         this.app.getLogger().info('Selected Domain:', domainSelection);
         this.app.getLogger().info('Selected Equity:', equitySelection);
         
-        // Saving the data to persistence
         // if (domainSelection && equitySelection) {
         //     await MarketPersistence.storeUserWishlist(
         //         this.persistence, 

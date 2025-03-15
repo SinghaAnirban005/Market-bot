@@ -1,4 +1,3 @@
-// Add this to your relevant handler file (like ExecuteViewSubmitHandler.ts or create a new file)
 import {
     IHttp,
     ILogger,
@@ -7,7 +6,7 @@ import {
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IUIKitResponse, UIKitBlockInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
-import { MarketBotApp } from "../MarketBotApp"; // Adjust this import to your app name
+import { MarketBotApp } from "../MarketBotApp"; 
 import { App } from "@rocket.chat/apps-engine/definition/App";
 
 export class ButtonActionHandler {

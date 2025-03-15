@@ -14,6 +14,7 @@ export async function StockHandler(
 async function getStockPrices(http: IHttp, apiKey: string, symbol: string) {
     const apiEndpoint = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${apiKey}`
     const imageEndpoint = 'https://quickchart.io/chart/create'
+    
     const response = await http.get(apiEndpoint, {
         headers: {
             "Content-Type": "application/json",
@@ -24,7 +25,6 @@ async function getStockPrices(http: IHttp, apiKey: string, symbol: string) {
         throw new Error(`API error: ${response.statusCode}`);
     }
     const data = response['data']
-    return data;
     const timeSeries = data["Time Series (5min)"];
     const latestTime = data["Meta Data"]["3. Last Refreshed"];
     const latestData = timeSeries[latestTime];
