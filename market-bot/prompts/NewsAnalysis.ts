@@ -30,7 +30,6 @@ export async function SummarizeNews(data: any, read: IRead, http: IHttp, symbol:
         3. Actionable insights
         `;
 
-    // Send the prompt to the LLM API
     const response = await http.post(LLMapiEndpoint, {
         headers: {
             'Content-Type': 'application/json',
