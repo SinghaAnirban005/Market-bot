@@ -12,6 +12,9 @@ import { SummarizeTrends } from "../prompts/AssetTrend";
 import { UIKitSurfaceType } from "@rocket.chat/apps-engine/definition/uikit";
 import { NewsHandler } from "../lib/NewsHandler";
 import { SummarizeNews } from "../prompts/NewsAnalysis";
+import { calculatePriceMovementConfidence } from "../utils/PriceConfidence";
+import { calculateNewsSentimentConfidence } from "../utils/NewsConfidence";
+import { calculateVolumeConfidence } from "../utils/VolumeConfidence";
 
 class MarketCommand implements ISlashCommand {
     public command = "market"
@@ -205,10 +208,18 @@ class MarketCommand implements ISlashCommand {
             await MarketPersistence.deleteAllUserWatchlist(persis)
         }
         else if(category === "trend"){
-            const response = await StockHandler(http, read, symbol)
-            this.app.getLogger().log("Response -> ", response)
-            const summary = await SummarizeTrends(response, read, http, symbol)
-            res = summary
+            const stocksData = await StockHandler(http, read, symbol)
+            const newsData = await NewsHandler(http, read, symbol)
+            const feed = newsData.feed
+            // this.app.getLogger().log("Response -> ", response)
+            // const summary = await SummarizeTrends(response, read, http, symbol)
+            // res = summary
+            const priceMovementConfidence = calculatePriceMovementConfidence(stocksData)
+            const newsSentimentConfidence = calculateNewsSentimentConfidence(feed, symbol)
+            const volumeConfidence = calculateVolumeConfidence(stocksData)
+
+            
+
         } else if(category === "news") {
             const newsData = await NewsHandler(http, read, symbol)
 
