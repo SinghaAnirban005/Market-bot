@@ -209,17 +209,16 @@ class MarketCommand implements ISlashCommand {
             await MarketPersistence.deleteAllUserWatchlist(persis)
         }
         else if(category === "trend"){
-            // const stocksData = await StockHandler(http, read, symbol)
-            // const newsData = await NewsHandler(http, read, symbol)
-            // const feed = newsData.feed
+            const stocksData = await StockHandler(http, read, symbol)
+            const newsData = await NewsHandler(http, read, symbol)
+            const feed = newsData.feed
             // this.app.getLogger().log("Response -> ", response)
             // const summary = await SummarizeTrends(response, read, http, symbol)
             // res = summary
-            // const priceMovementConfidence = calculatePriceMovementConfidence(stocksData)
-            // const newsSentimentConfidence = calculateNewsSentimentConfidence(feed, symbol)
-            // const volumeConfidence = calculateVolumeConfidence(stocksData)
-            // const confidenceScore = (0.5 * priceMovementConfidence) + (0.3 * newsSentimentConfidence) + (0.2 * volumeConfidence);
-            //const sum = await SummarizeTrends(stocksData, read, http ,symbol, confidenceScore, feed)
+            const priceMovementConfidence = calculatePriceMovementConfidence(stocksData)
+            const newsSentimentConfidence = calculateNewsSentimentConfidence(feed, symbol)
+            const volumeConfidence = calculateVolumeConfidence(stocksData)
+            const confidenceScore = (0.5 * priceMovementConfidence) + (0.3 * newsSentimentConfidence) + (0.2 * volumeConfidence);
             const now = new Date();
 
             // Subtract 7 days
@@ -227,7 +226,7 @@ class MarketCommand implements ISlashCommand {
         
             // Extract individual components
             const year = now.getUTCFullYear();
-            const month = String(now.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based
+            const month = String(now.getUTCMonth() + 1).padStart(2, '0');
             const day = String(now.getUTCDate()).padStart(2, '0');
             const hours = String(now.getUTCHours()).padStart(2, '0');
             const minutes = String(now.getUTCMinutes()).padStart(2, '0');
@@ -247,13 +246,15 @@ class MarketCommand implements ISlashCommand {
             }
             // console.log(res2)
             const info2 = res2["data"]
-            // const weeklyNews = info2["feed"]
+            const weeklyNews = info2["feed"]
             // const sentimentScores = weeklyNews.map((article) => article.overall_sentiment_score);
             // const averageSentiment = sentimentScores.reduce((sum, score) => sum + score, 0) / sentimentScores.length;
-            this.app.getLogger().log("WEEEKLY NEWS -> ", info2)
-            this.app.getLogger().log("WEEEKLY NEWS -> ",typeof info2)
+            this.app.getLogger().log("WEEEKLY NEWS -> ", weeklyNews)
+            this.app.getLogger().log("WEEEKLY NEWS -> ",typeof weeklyNews)
             // this.app.getLogger().log(averageSentiment)
-            
+
+            const sum = await SummarizeTrends(stocksData, read, http ,symbol, confidenceScore, feed, weeklyNews)
+            res = sum
         } else if(category === "news") {
             const newsData = await NewsHandler(http, read, symbol)
 

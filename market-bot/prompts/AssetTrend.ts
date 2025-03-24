@@ -1,7 +1,7 @@
 import { IHttp, IRead } from "@rocket.chat/apps-engine/definition/accessors";
 import { getAPIConfig } from "../settings/settings";
 
-export async function SummarizeTrends(data: any, read: IRead, http: IHttp, symbol: string, confidenceScore, news) {
+export async function SummarizeTrends(data: any, read: IRead, http: IHttp, symbol: string, confidenceScore, news, weeklyNews) {
     const { LLMapiKey } = await getAPIConfig(read);
     const { LLMapiEndpoint } = await getAPIConfig(read);
 
@@ -33,19 +33,19 @@ export async function SummarizeTrends(data: any, read: IRead, http: IHttp, symbo
     const info = res['data']
     const weeklyOHLCdata = info['Weekly Time Series']
 
-    const historicalNewsEP = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&time_from=${timeFrom}&apikey=${LLMapiKey}&sort=RELEVANCE`
-    const res2 = await http.get(historicalNewsEP, {
-        headers: {
-            "Content-Type": "application/json",
-        }
-    })
+    // const historicalNewsEP = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&time_from=${timeFrom}&apikey=${LLMapiKey}&sort=RELEVANCE`
+    // const res2 = await http.get(historicalNewsEP, {
+    //     headers: {
+    //         "Content-Type": "application/json",
+    //     }
+    // })
 
-    if (res2.statusCode !== 200) {
-        throw new Error(`API error: ${res2.statusCode}`);
-    }
+    // if (res2.statusCode !== 200) {
+    //     throw new Error(`API error: ${res2.statusCode}`);
+    // }
     // console.log(res2)
-    const info2 = res2["data"]
-    const weeklyNews = info2["feed"]
+    // const info2 = res2["data"]
+    // const weeklyNews = info2["feed"]
     
     // console.log("info2 --> ", info2)
     // console.log("weeklyNews -->", weeklyNews)
