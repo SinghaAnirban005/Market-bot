@@ -28,28 +28,86 @@ async function getStockPrices(http: IHttp, apiKey: string, symbol: string) {
 
     const timeSeries = data["Time Series (5min)"];
 
-    return timeSeries
-    const latestTime = data["Meta Data"]["3. Last Refreshed"];
-    const latestData = timeSeries[latestTime];
+    // return timeSeries
+    const lastRefreshed = data["Meta Data"]["3. Last Refreshed"];
+
+    // Convert last refreshed time to Date object
+    const latestTime = new Date(lastRefreshed);
+
+    // Calculate timestamps for 5, 15, and 30 minutes before
+    const getFormattedTime = (date) => date.toISOString().replace("T", " ").substring(0, 19);
+
+    const fiveMinBefore = new Date(latestTime.getTime() - 5 * 60000);
+    const fifteenMinBefore = new Date(latestTime.getTime() - 15 * 60000);
+    const thirtyMinBefore = new Date(latestTime.getTime() - 30 * 60000);
+
+    // Extract data for each interval
+    const latestData = timeSeries[lastRefreshed];
+    const fiveMinData = timeSeries[getFormattedTime(fiveMinBefore)];
+    const fifteenMinData = timeSeries[getFormattedTime(fifteenMinBefore)];
+    const thirtyMinData = timeSeries[getFormattedTime(thirtyMinBefore)];
 
     const imageReq = {
         chart: {
           type: "bar",
           data: {
             labels: ["Open", "High", "Low", "Close"],
-            datasets: [{
-              label: "Stock Price",
-              data: [
-                parseFloat(latestData["1. open"]),
-                parseFloat(latestData["2. high"]),
-                parseFloat(latestData["3. low"]),
-                parseFloat(latestData["4. close"])
-              ],
-              backgroundColor: ["#4caf50", "#ff9800", "#f44336", "#2196f3"]
-            }]
+            datasets: [
+              {
+                label: `Latest (${lastRefreshed})`,
+                data: [
+                  parseFloat(latestData["1. open"]),
+                  parseFloat(latestData["2. high"]),
+                  parseFloat(latestData["3. low"]),
+                  parseFloat(latestData["4. close"])
+                ],
+                backgroundColor: "rgba(75, 192, 192, 0.6)"
+              },
+              {
+                label: `5min Before (${getFormattedTime(fiveMinBefore)})`,
+                data: [
+                  parseFloat(fiveMinData?.["1. open"] || 0),
+                  parseFloat(fiveMinData?.["2. high"] || 0),
+                  parseFloat(fiveMinData?.["3. low"] || 0),
+                  parseFloat(fiveMinData?.["4. close"] || 0)
+                ],
+                backgroundColor: "rgba(255, 159, 64, 0.6)"
+              },
+              {
+                label: `15min Before (${getFormattedTime(fifteenMinBefore)})`,
+                data: [
+                  parseFloat(fifteenMinData?.["1. open"] || 0),
+                  parseFloat(fifteenMinData?.["2. high"] || 0),
+                  parseFloat(fifteenMinData?.["3. low"] || 0),
+                  parseFloat(fifteenMinData?.["4. close"] || 0)
+                ],
+                backgroundColor: "rgba(153, 102, 255, 0.6)"
+              },
+              {
+                label: `30min Before (${getFormattedTime(thirtyMinBefore)})`,
+                data: [
+                  parseFloat(thirtyMinData?.["1. open"] || 0),
+                  parseFloat(thirtyMinData?.["2. high"] || 0),
+                  parseFloat(thirtyMinData?.["3. low"] || 0),
+                  parseFloat(thirtyMinData?.["4. close"] || 0)
+                ],
+                backgroundColor: "rgba(255, 99, 132, 0.6)"
+              }
+            ]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: false,
+                title: {
+                  display: true,
+                  text: "Price (USD)"
+                }
+              }
+            }
           }
         }
-    };
+      };
 
     const imageUrl = await http.post(imageEndpoint, {
         data: imageReq,

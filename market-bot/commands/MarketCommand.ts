@@ -12,6 +12,7 @@ import { SummarizeTrends } from "../prompts/AssetTrend";
 import { UIKitSurfaceType } from "@rocket.chat/apps-engine/definition/uikit";
 import { NewsHandler } from "../lib/NewsHandler";
 import { SummarizeNews } from "../prompts/NewsAnalysis";
+import { CryptoHandler } from "../lib/CryptoHandler";
 import { calculatePriceMovementConfidence } from "../utils/PriceConfidence";
 import { calculateNewsSentimentConfidence } from "../utils/NewsConfidence";
 import { calculateVolumeConfidence } from "../utils/VolumeConfidence";
@@ -208,24 +209,60 @@ class MarketCommand implements ISlashCommand {
             await MarketPersistence.deleteAllUserWatchlist(persis)
         }
         else if(category === "trend"){
-            const stocksData = await StockHandler(http, read, symbol)
-            const newsData = await NewsHandler(http, read, symbol)
-            const feed = newsData.feed
+            // const stocksData = await StockHandler(http, read, symbol)
+            // const newsData = await NewsHandler(http, read, symbol)
+            // const feed = newsData.feed
             // this.app.getLogger().log("Response -> ", response)
             // const summary = await SummarizeTrends(response, read, http, symbol)
             // res = summary
-            const priceMovementConfidence = calculatePriceMovementConfidence(stocksData)
-            const newsSentimentConfidence = calculateNewsSentimentConfidence(feed, symbol)
-            const volumeConfidence = calculateVolumeConfidence(stocksData)
+            // const priceMovementConfidence = calculatePriceMovementConfidence(stocksData)
+            // const newsSentimentConfidence = calculateNewsSentimentConfidence(feed, symbol)
+            // const volumeConfidence = calculateVolumeConfidence(stocksData)
+            // const confidenceScore = (0.5 * priceMovementConfidence) + (0.3 * newsSentimentConfidence) + (0.2 * volumeConfidence);
+            //const sum = await SummarizeTrends(stocksData, read, http ,symbol, confidenceScore, feed)
+            const now = new Date();
 
+            // Subtract 7 days
+            now.setUTCDate(now.getUTCDate() - 7);
+        
+            // Extract individual components
+            const year = now.getUTCFullYear();
+            const month = String(now.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based
+            const day = String(now.getUTCDate()).padStart(2, '0');
+            const hours = String(now.getUTCHours()).padStart(2, '0');
+            const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+        
+            // Format it as YYYYMMDDTHHMM
+            const timeFrom = `${year}${month}${day}T${hours}${minutes}`;
+
+            const historicalNewsEP = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&time_from=${timeFrom}&apikey=LVG7919O1R681R1U&sort=RELEVANCE`
+            const res2 = await http.get(historicalNewsEP, {
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+
+            if (res2.statusCode !== 200) {
+                throw new Error(`API error: ${res2.statusCode}`);
+            }
+            // console.log(res2)
+            const info2 = res2["data"]
+            // const weeklyNews = info2["feed"]
+            // const sentimentScores = weeklyNews.map((article) => article.overall_sentiment_score);
+            // const averageSentiment = sentimentScores.reduce((sum, score) => sum + score, 0) / sentimentScores.length;
+            this.app.getLogger().log("WEEEKLY NEWS -> ", info2)
+            this.app.getLogger().log("WEEEKLY NEWS -> ",typeof info2)
+            // this.app.getLogger().log(averageSentiment)
             
-
         } else if(category === "news") {
             const newsData = await NewsHandler(http, read, symbol)
 
             const newsSummary = await SummarizeNews(newsData, read, http, symbol)
             this.app.getLogger().log("News summary -> ", newsSummary)
             res = newsSummary
+        } else if(category === "trends") {
+            const cryptoData = await CryptoHandler(http, read, symbol)
+            this.app.getLogger().log(cryptoData)
         }
 
         

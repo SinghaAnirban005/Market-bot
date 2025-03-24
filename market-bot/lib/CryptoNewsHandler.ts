@@ -1,7 +1,7 @@
 import { IHttp, IRead } from "@rocket.chat/apps-engine/definition/accessors";
 import { getAPIConfig } from "../settings/settings";
 
-export async function NewsHandler(
+export async function CryptoNewsHandler(
     http: IHttp,
     read: IRead,
     symbol: string

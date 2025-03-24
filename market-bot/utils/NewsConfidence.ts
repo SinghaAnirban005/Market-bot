@@ -1,4 +1,5 @@
 export const calculateNewsSentimentConfidence = (newsData: any[], symbol: string) => {
+    console.log(newsData)
     const relevantNews = newsData.filter((article) =>
         article.ticker_sentiment.some((ticker: any) => ticker.ticker === symbol)
     );
