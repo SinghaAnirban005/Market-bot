@@ -196,7 +196,7 @@ class MarketCommand implements ISlashCommand {
         else if(category === "schedule") {
             await modify.getScheduler().scheduleRecurring({
                 id: 'stock-update-processor',
-                interval: '5 seconds',
+                interval: '1 minute',
                 data: {app: this.app}
             })
             res = `Started stock updates every 0.1 minutes.`;
@@ -261,9 +261,177 @@ class MarketCommand implements ISlashCommand {
             const newsSummary = await SummarizeNews(newsData, read, http, symbol)
             this.app.getLogger().log("News summary -> ", newsSummary)
             res = newsSummary
+
         } else if(category === "trends") {
             const cryptoData = await CryptoHandler(http, read, symbol)
             this.app.getLogger().log(cryptoData)
+        }
+
+        else if(category === "subscribe"){
+            await modify.getUiController().openSurfaceView(
+                {
+                  type: UIKitSurfaceType.MODAL,
+                  id: 'subscription_modal',
+                  title: { 
+                    text: 'Subscription Modal',
+                    type: 'plain_text' 
+                  },
+                  blocks: [
+                    {
+                  type: 'actions',
+                  blockId: 'action_block_1',
+                    elements: [
+                        {
+                            type: 'static_select',
+                            actionId: 'select_action_1',
+                            blockId: 'select_block_1',
+                            appId: this.app.getID(),
+                            placeholder: {
+                                type: 'plain_text',
+                                text: 'Select asset type'
+                            },
+                            options: [
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Stock'
+                                    },
+                                    value: 'stock'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Forex'
+                                    },
+                                    value: 'forex'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Crypto Currency'
+                                    },
+                                    value: 'crypto'
+                                },
+                            ]
+                        },
+                    ]
+                },
+                {
+                    type: 'divider',
+                    blockId: 'divider_1',
+                }, 
+                {
+                    type: 'actions',
+                    blockId: 'action_block_2',
+                      elements: [
+                        {
+                            type: 'multi_static_select',
+                            actionId: 'select_action_2',
+                            blockId: 'select_block_2',
+                            appId: this.app.getID(),
+                            placeholder: {
+                                type: 'plain_text',
+                                text: 'Select equity'
+                            },
+                            options: [
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'IBM'
+                                    },
+                                    value: 'IBM'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Microsoft'
+                                    },
+                                    value: 'MSFT'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: 'Apple'
+                                    },
+                                    value: 'AAPL'
+                                },
+                            ]
+                        }
+                      ]
+                  }, 
+                  {
+                    type: 'actions',
+                    blockId: 'action_block_3',
+                      elements: [
+                        {
+                            type: 'static_select',
+                            actionId: 'select_action_3',
+                            blockId: 'select_block_3',
+                            appId: this.app.getID(),
+                            placeholder: {
+                                type: 'plain_text',
+                                text: 'Select polling time'
+                            },
+                            options: [
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: '1 minute'
+                                    },
+                                    value: '1 minute'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: '5 minute'
+                                    },
+                                    value: '5 minute'
+                                },
+                                {
+                                    text: {
+                                        type: 'plain_text',
+                                        text: '10 minute'
+                                    },
+                                    value: '10 minute'
+                                },
+                            ]
+                        }
+                      ]
+                  }, 
+                //   {
+                //     type: 'actions', // the action block
+                //     appId: this.app.getID(),
+                //     blockId: 'action_block_3',
+                //     elements: [ // the elements parameter contains the action element details, in this case, a button element
+                //         {
+                //             type: 'button',
+                //             actionId: 'save_wishlist_action',
+                //             appId: this.app.getID(),
+                //             blockId: 'button_action_block_3',
+                //             text: {
+                //                 type: 'plain_text',
+                //                 text: 'Save'
+                //             },
+                //             style: 'primary',
+                //             value: 'Button element'
+                //         }
+                //     ]
+                // },
+               ],
+               //@ts-ignore
+               submit: {
+                    type: 'button',
+                    text: {
+                        type: 'plain_text',
+                        text: 'Subscribe'
+                    },
+                    style: 'primary'
+               }
+              },
+                { triggerId: context.getTriggerId()! },
+                context.getSender()
+              )
+
         }
 
         

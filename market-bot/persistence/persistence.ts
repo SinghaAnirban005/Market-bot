@@ -86,9 +86,54 @@ export class MarketPersistence {
     //     }
     // }
 
+    public static async storeUserSubscription (
+        persistence: IPersistence,
+        roomId: string,
+        userId: string,
+        category: string,
+        data: any
+    ): Promise<boolean> {
+        const associations: Array<RocketChatAssociationRecord> = [
+            new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'user-watchlist'),
+            new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'subscription'),
+            new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, roomId),
+            new RocketChatAssociationRecord(RocketChatAssociationModel.USER, userId),
+            new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, category)
+        ]
+
+        try {
+            await Promise.all(data.map(async (element) => {
+                console.log(element)
+                const dataToStore = {
+                    symbol: element,
+                    roomId,
+                    userId
+                };
+                return persistence.createWithAssociations(dataToStore, associations);
+            }));
+            return true;
+        } catch (error) {
+            console.warn('Failed to store user-watch data ', error);
+            return false;
+        }
+    }
+
     public static async getAllUserWatchList(persistence: IPersistenceRead): Promise<Array<any>> {
         const associations: Array<RocketChatAssociationRecord> = [
             new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'user-watchlist'),
+        ];
+
+        try {
+            return await persistence.readByAssociations(associations);
+        } catch (err) {
+            console.warn('Failed to retrieve user-watch data:', err);
+            return [];
+        }
+    }
+
+    public static async getAllSubscriptions(persistence: IPersistenceRead): Promise<Array<any>> {
+        const associations: Array<RocketChatAssociationRecord> = [
+            new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, 'subscription'),
         ];
 
         try {

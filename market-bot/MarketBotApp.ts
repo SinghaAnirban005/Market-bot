@@ -7,7 +7,7 @@ import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
 import { MarketCommand } from './commands/MarketCommand';
 import { IConfigurationExtend } from '@rocket.chat/apps-engine/definition/accessors';
 import { settings } from './settings/settings';
-import { stockUpdateScheduler } from './scheduler/StockScheduler';
+import { pollAllEquity } from './scheduler/StockScheduler';
 import { IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IHttp } from '@rocket.chat/apps-engine/definition/accessors';
 import { IPersistence } from '@rocket.chat/apps-engine/definition/accessors';
@@ -35,7 +35,7 @@ export class MarketBotApp extends App {
         configuration.scheduler.registerProcessors([
             {
                 id: 'stock-update-processor',
-                processor: stockUpdateScheduler,
+                processor: pollAllEquity,
                 // Optional: automatically start the processor during app startup
                 // startupSetting: {
                 //     type: StartupType.RECURRING,
@@ -82,7 +82,7 @@ export class MarketBotApp extends App {
     public async executeViewSubmitHandler(context: UIKitViewSubmitInteractionContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<IUIKitResponse> {
         const data = context.getInteractionData();
         
-        if (data.view.id === 'wishlist_modal') {
+        if (data.view.id === 'subscription_modal') {
             const handler = new WishlistViewSubmitHandler(this, read, http, persistence, modify, context);
             return await handler.executor();
         }

@@ -106,6 +106,10 @@ export async function SummarizeTrends(data: any, read: IRead, http: IHttp, symbo
         },
     });
 
+
+    // Case of summary template when users dont use LLM (Approach 2)
+
+
     const stringifiedResponse = JSON.stringify(response);
     const response_data = JSON.parse(stringifiedResponse)
     const content = response_data.data.choices[0].message.content
@@ -153,3 +157,49 @@ const compareWithHistoricalTrends = (currentOHLC: any, historicalOHLC: any, curr
         trendComparison,
     };
 };
+
+function generateTrendSummary(
+    symbol: string,
+    comparisonData: {
+        currentTrend: string;
+        historicalTrend: string;
+        trendComparison: string;
+    },
+    confidenceScore: number
+): string {
+
+    let confidenceLevel: string;
+    if (confidenceScore >= 0.8) {
+        confidenceLevel = "High Confidence";
+    } else if (confidenceScore >= 0.5) {
+        confidenceLevel = "Moderate Confidence";
+    } else {
+        confidenceLevel = "Low Confidence";
+    }
+
+    const trendStrength = comparisonData.currentTrend.includes("Strong") 
+        ? "strong" 
+        : comparisonData.currentTrend.includes("Weak") 
+            ? "weak" 
+            : "";
+
+    let summary = `The current trend for ${symbol} is ${trendStrength ? trendStrength + " " : ""}${comparisonData.currentTrend.toLowerCase()}`;
+
+    if (comparisonData.trendComparison === "Consistent with historical trend") {
+        summary += `, which is consistent with the historical ${comparisonData.historicalTrend.split[1].toLowerCase()}`;
+    } else {
+        summary += `, which diverges from the historical ${comparisonData.historicalTrend.toLowerCase()}`;
+    }
+
+    summary += `. The confidence score is ${confidenceScore.toFixed(2)} (${confidenceLevel}), `;
+
+    if (confidenceScore >= 0.8) {
+        summary += "indicating that the analysis is highly reliable.";
+    } else if (confidenceScore >= 0.5) {
+        summary += "suggesting the analysis is moderately reliable.";
+    } else {
+        summary += "meaning the analysis should be treated with caution.";
+    }
+
+    return summary;
+}
