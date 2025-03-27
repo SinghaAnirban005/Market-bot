@@ -434,6 +434,10 @@ class MarketCommand implements ISlashCommand {
 
         }
 
+        else if(symbol === "predict"){
+            
+        }
+
         
         if(appUser){
             await sendMessage(modify, appUser, room, res)

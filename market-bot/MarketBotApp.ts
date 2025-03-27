@@ -36,12 +36,6 @@ export class MarketBotApp extends App {
             {
                 id: 'stock-update-processor',
                 processor: pollAllEquity,
-                // Optional: automatically start the processor during app startup
-                // startupSetting: {
-                //     type: StartupType.RECURRING,
-                //     interval: '10 seconds',
-                //     data: { app: this }
-                // }
             },
         ]);
         // configuration.ui.registerButton({

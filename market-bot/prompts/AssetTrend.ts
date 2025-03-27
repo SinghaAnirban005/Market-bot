@@ -80,47 +80,50 @@ export async function SummarizeTrends(data: any, read: IRead, http: IHttp, symbo
         - If the data is insufficient, state: "Insufficient data for analysis."
 
         **Example Output**:
-        "The current trend is a strong uptrend, which is consistent with the historical uptrend observed over the past weeks. The confidence score is 0.85 (High Confidence), indicating that the analysis is highly reliable."
+        "The current trend is a strong uptrend, which is consistent with the historical uptrend observed over the past weeks.
+         The confidence score is 0.85 (High Confidence), indicating that the analysis is highly reliable."
     `;
 
 
-    const response = await http.post(LLMapiEndpoint, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${LLMapiKey}`,
-        },
-        data: {
-            model: "deepseek-r1-distill-qwen-32b",
-            messages: [
-                {
-                    role: "user",
-                    content: [
-                        {
-                            type: "text",
-                            text: prompt,
-                        },
-                    ],
-                },
-            ],
-            stream: false,
-        },
-    });
+    // const response = await http.post(LLMapiEndpoint, {
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         'Authorization': `Bearer ${LLMapiKey}`,
+    //     },
+    //     data: {
+    //         model: "deepseek-r1-distill-qwen-32b",
+    //         messages: [
+    //             {
+    //                 role: "user",
+    //                 content: [
+    //                     {
+    //                         type: "text",
+    //                         text: prompt,
+    //                     },
+    //                 ],
+    //             },
+    //         ],
+    //         stream: false,
+    //     },
+    // });
 
 
     // Case of summary template when users dont use LLM (Approach 2)
 
 
-    const stringifiedResponse = JSON.stringify(response);
-    const response_data = JSON.parse(stringifiedResponse)
-    const content = response_data.data.choices[0].message.content
-    const cleanContent = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+    // const stringifiedResponse = JSON.stringify(response);
+    // const response_data = JSON.parse(stringifiedResponse)
+    // const content = response_data.data.choices[0].message.content
+    // const cleanContent = content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
 
-    return cleanContent
+    // return cleanContent
+
+    const response = generateTrendSummary(symbol, comparisionData, confidenceScore)
+    return response
 }
 
 const identifyTrend = (ohlcData: any, newsData: any[]) => {
-    // Price trend analysis
     const prices = Object.values(ohlcData).map((data: any) => parseFloat(data['4. close']));
     const priceChanges: any[] = [];
     for (let i = 1; i < prices.length; i++) {
@@ -128,12 +131,8 @@ const identifyTrend = (ohlcData: any, newsData: any[]) => {
         priceChanges.push(change);
     }
     const averagePriceChange = priceChanges.reduce((sum, change) => sum + change, 0) / priceChanges.length;
-
-    // Sentiment trend analysis
     const sentimentScores = newsData.map((article) => article.overall_sentiment_score);
     const averageSentiment = sentimentScores.reduce((sum, score) => sum + score, 0) / sentimentScores.length;
-
-    // Combine price and sentiment trends
     if (averagePriceChange > 0.01 && averageSentiment > 0.1) return 'Strong Uptrend';
     if (averagePriceChange > 0.01 && averageSentiment <= 0.1) return 'Weak Uptrend';
     if (averagePriceChange < -0.01 && averageSentiment < -0.1) return 'Strong Downtrend';
@@ -142,15 +141,9 @@ const identifyTrend = (ohlcData: any, newsData: any[]) => {
 };
 
 const compareWithHistoricalTrends = (currentOHLC: any, historicalOHLC: any, currentNews: any[], historicalNews: any[]) => {
-    // Identify current and historical trends
-    console.log("curret ", currentNews)
-    console.log("historical ", historicalNews)
     const currentTrend = identifyTrend(currentOHLC, currentNews);
     const historicalTrend = identifyTrend(historicalOHLC, historicalNews);
-
-    // Compare trends
     const trendComparison = currentTrend === historicalTrend ? 'Consistent with historical trend' : 'Diverging from historical trend';
-
     return {
         currentTrend,
         historicalTrend,
@@ -186,13 +179,11 @@ function generateTrendSummary(
     let summary = `The current trend for ${symbol} is ${trendStrength ? trendStrength + " " : ""}${comparisonData.currentTrend.toLowerCase()}`;
 
     if (comparisonData.trendComparison === "Consistent with historical trend") {
-        summary += `, which is consistent with the historical ${comparisonData.historicalTrend.split[1].toLowerCase()}`;
+        summary += `, which is consistent with the historical ${comparisonData.historicalTrend.toLowerCase()}`;
     } else {
         summary += `, which diverges from the historical ${comparisonData.historicalTrend.toLowerCase()}`;
     }
-
     summary += `. The confidence score is ${confidenceScore.toFixed(2)} (${confidenceLevel}), `;
-
     if (confidenceScore >= 0.8) {
         summary += "indicating that the analysis is highly reliable.";
     } else if (confidenceScore >= 0.5) {

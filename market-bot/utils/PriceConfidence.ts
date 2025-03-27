@@ -1,7 +1,6 @@
 export const calculatePriceMovementConfidence = (ohlcData: any) => {
     const priceChanges: any[] = [];
     let previousClose: any = null;
-
     for (const timestamp in ohlcData) {
         const closePrice = parseFloat(ohlcData[timestamp]['4. close']);
         if (previousClose !== null) {
@@ -10,8 +9,7 @@ export const calculatePriceMovementConfidence = (ohlcData: any) => {
         }
         previousClose = closePrice;
     }
-
     const averagePriceChange = priceChanges.reduce((sum, change) => sum + change, 0) / priceChanges.length;
-    const priceMovementConfidence = Math.abs(averagePriceChange); // Confidence based on magnitude of change
+    const priceMovementConfidence = Math.abs(averagePriceChange);
     return priceMovementConfidence;
 };
