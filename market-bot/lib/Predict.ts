@@ -1,107 +1,144 @@
-// import { IHttp, IRead } from "@rocket.chat/apps-engine/definition/accessors";
-// import { getAPIConfig } from "../settings/settings";
+// I shall be using the Monte-Carlo approach since i am thinking of just predicting prices (not the timings of when user should buy or sell)
 
-// export async function StockHandler(
-//     http: IHttp,
-//     read: IRead,
-//     symbol: string
-// ): Promise<any> { 
-//     const { apiKey } = await getAPIConfig(read)
+import { IHttp } from "@rocket.chat/apps-engine/definition/accessors";
 
-//     return await getStockPrices(http, apiKey, symbol)
-// }
+export async function PredictPrices(response: any, latestPrice: number, config: any, http: IHttp) {
+    const imageEndpoint = 'https://quickchart.io/chart/create'
+    const timeSeries = response["Time Series (5min)"];
+    const historicalPrices: number[] = Object.values(timeSeries).map((entry: any) => parseFloat(entry["4. close"]));
+    console.log(typeof latestPrice)
+    historicalPrices.reverse();
+  
+    const { drift, volatility } = calculateStats(historicalPrices);
+    const results: number[][] = [];
+    console.log("Drift ",typeof drift)
+    console.log("Volatillity ",typeof volatility)
 
-// async function getStockPrices(http: IHttp, apiKey: string, symbol: string) {
-//     const apiEndpoint = `https://finnhub.io/api/v1/stock/recommendation?symbol=${symbol}&token=cvhblo1r01qrtb3nk57gcvhblo1r01qrtb3nk580`
-//     const imageEndpoint = 'https://quickchart.io/chart/create'
-    
-//     const response = await http.get(apiEndpoint, {
-//         headers: {
-//             "Content-Type": "application/json",
-//         }
-//     })
+    for (let i = 0; i < config.simulations; i++) {
+        const path = [latestPrice];
+        for (let day = 1; day <= config.days; day++) {
+          const shock = volatility * gaussianRandom();
+          const price = path[day - 1] * Math.exp(drift + shock);
+          path.push(price);
+        }
+        results.push(path.slice(1));
+    }
 
-//     if (response.statusCode !== 200) {
-//         throw new Error(`API error: ${response.statusCode}`);
-//     }
-//     const data = response['data']
+    const predictions = Array.from({ length: config.days }, (_, day) => {
+        const dailyPrices = results.map(path => path[day]);
+        dailyPrices.sort((a, b) => a - b);
+        return {
+          date: new Date(Date.now() + (day + 1) * 86400000).toISOString().split('T')[0],
+          medianPrice: dailyPrices[Math.floor(config.simulations * 0.5)],
+          upper95: dailyPrices[Math.floor(config.simulations * 0.975)],
+          lower95: dailyPrices[Math.floor(config.simulations * 0.025)],
+        };
+    });
 
-//     const imageReq = {
-//         chart: {
-//           type: "bar",
-//           data: {
-//             labels: ["Open", "High", "Low", "Close"],
-//             datasets: [
-//               {
-//                 label: `Latest (${lastRefreshed})`,
-//                 data: [
-//                   parseFloat(latestData["1. open"]),
-//                   parseFloat(latestData["2. high"]),
-//                   parseFloat(latestData["3. low"]),
-//                   parseFloat(latestData["4. close"])
-//                 ],
-//                 backgroundColor: "rgba(75, 192, 192, 0.6)"
-//               },
-//               {
-//                 label: `5min Before (${getFormattedTime(fiveMinBefore)})`,
-//                 data: [
-//                   parseFloat(fiveMinData?.["1. open"] || 0),
-//                   parseFloat(fiveMinData?.["2. high"] || 0),
-//                   parseFloat(fiveMinData?.["3. low"] || 0),
-//                   parseFloat(fiveMinData?.["4. close"] || 0)
-//                 ],
-//                 backgroundColor: "rgba(255, 159, 64, 0.6)"
-//               },
-//               {
-//                 label: `15min Before (${getFormattedTime(fifteenMinBefore)})`,
-//                 data: [
-//                   parseFloat(fifteenMinData?.["1. open"] || 0),
-//                   parseFloat(fifteenMinData?.["2. high"] || 0),
-//                   parseFloat(fifteenMinData?.["3. low"] || 0),
-//                   parseFloat(fifteenMinData?.["4. close"] || 0)
-//                 ],
-//                 backgroundColor: "rgba(153, 102, 255, 0.6)"
-//               },
-//               {
-//                 label: `30min Before (${getFormattedTime(thirtyMinBefore)})`,
-//                 data: [
-//                   parseFloat(thirtyMinData?.["1. open"] || 0),
-//                   parseFloat(thirtyMinData?.["2. high"] || 0),
-//                   parseFloat(thirtyMinData?.["3. low"] || 0),
-//                   parseFloat(thirtyMinData?.["4. close"] || 0)
-//                 ],
-//                 backgroundColor: "rgba(255, 99, 132, 0.6)"
-//               }
-//             ]
-//           },
-//           options: {
-//             scales: {
-//               y: {
-//                 beginAtZero: false,
-//                 title: {
-//                   display: true,
-//                   text: "Price (USD)"
-//                 }
-//               }
-//             }
-//           }
-//         }
-//       };
+    const chartConfig = {
+        type: 'bar',
+        data: {
+            labels: predictions.map(p => p.date),
+            datasets: [
+                {
+                    label: 'Lower Bound (95%)',
+                    data: predictions.map(p => p.lower95),
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                },
+                {
+                    label: 'Median Price',
+                    data: predictions.map(p => p.medianPrice),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                },
+                {
+                    label: 'Upper Bound (95%)',
+                    data: predictions.map(p => p.upper95),
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Price (USD)'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Stock Price Forecast (Next ${config.days} Days)`
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const pred = predictions[context.dataIndex];
+                            if (context.datasetIndex === 0) {
+                                return `Lower Bound: $${pred.lower95.toFixed(2)}`;
+                            } else if (context.datasetIndex === 1) {
+                                return `Median: $${pred.medianPrice.toFixed(2)}`;
+                            } else {
+                                return `Upper Bound: $${pred.upper95.toFixed(2)}`;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
 
-//     const imageUrl = await http.post(imageEndpoint, {
-//         data: imageReq,
-//         headers: {
-//             "Content-Type": "application/json"
-//         }
-//     })
+    const imageResponse = await http.post(imageEndpoint, {
+        data: {
+            chart: chartConfig,
+            width: 800,
+            height: 400,
+            backgroundColor: '#ffffff'
+        },
+        headers: {
+            "Content-Type": "application/json",
+        }
+    });
 
-//     if(imageUrl.statusCode !== 200){
-//         throw new Error(`Image API error: ${imageUrl.statusCode}`);
-//     }
+    const imageUrl = imageResponse.data?.url || '';
 
-//     const formattedMarkdown = `\n# 📊 Stock Data for **${symbol}**\n\n## 🔥 Latest Price Data (${latestTime})\n\n- **🟢 Open:** $${latestData["1. open"]}\n- **📈 High:** $${latestData["2. high"]}\n- **📉 Low:** $${latestData["3. low"]}\n- **🔴 Close:** $${latestData["4. close"]}\n- **📊 Volume:** ${latestData["5. volume"]} shares\n\n![Stock Chart](${imageUrl.data.url})\n\n_Real-time stock data fetched using [Alpha Vantage](https://www.alphavantage.co)_ 🚀\n`;
-    
-//     return {
-//         formattedMarkdown
-//     }
-// }
+    return `
+        ### 📊 Stock Price Predictions (Next ${config.days} Days)
+
+        **Latest Price:** $${latestPrice.toFixed(2)}  
+        **Volatility:** ${(volatility * 100).toFixed(2)}% (historical)  
+        **Model:** Monte Carlo Simulation (${config.simulations.toLocaleString()} runs) 
+        
+        ![Price Forecast Chart](${imageUrl})
+
+        #### Daily Forecasts:
+        ${predictions.map(pred => `
+        - **${pred.date}:**  
+        - **Median Price:** $${pred.medianPrice.toFixed(2)}  
+        - **95% Confidence Range:** $${pred.lower95.toFixed(2)}   $${pred.upper95.toFixed(2)}  
+        `).join('')}
+    `
+}
+
+
+const calculateStats = (prices: number[]) => {
+    const returns: number[] = [];
+    for (let i = 1; i < prices.length; i++) {
+      returns.push(Math.log(prices[i] / prices[i - 1]));
+    }
+    const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+    const variance = returns.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / returns.length;
+    const volatility = Math.sqrt(variance);
+    const drift = mean - 0.5 * variance; 
+    return { drift, volatility };
+  };
+
+const gaussianRandom = (): number => {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+};

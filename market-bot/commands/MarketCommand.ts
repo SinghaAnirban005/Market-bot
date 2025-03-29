@@ -16,6 +16,7 @@ import { CryptoHandler } from "../lib/CryptoHandler";
 import { calculatePriceMovementConfidence } from "../utils/PriceConfidence";
 import { calculateNewsSentimentConfidence } from "../utils/NewsConfidence";
 import { calculateVolumeConfidence } from "../utils/VolumeConfidence";
+import { PredictPrices } from "../lib/Predict";
 
 class MarketCommand implements ISlashCommand {
     public command = "market"
@@ -434,8 +435,14 @@ class MarketCommand implements ISlashCommand {
 
         }
 
-        else if(symbol === "predict"){
-            
+        else if(category === "predict"){
+            const stocksPrices = await StockHandler(http, read, symbol)
+            const data = stocksPrices["Meta Data"]
+            const latestDate = data["3. Last Refreshed"]
+            const latestPrice = stocksPrices["Time Series (5min)"]
+            const ltsPrice = latestPrice[latestDate]["4. close"]
+            const sum = await PredictPrices(stocksPrices, Number(ltsPrice), {days: 7, simulations: 10000}, http)
+            res = sum
         }
 
         

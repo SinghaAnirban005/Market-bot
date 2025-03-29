@@ -25,10 +25,8 @@ async function getStockPrices(http: IHttp, apiKey: string, symbol: string) {
         throw new Error(`API error: ${response.statusCode}`);
     }
     const data = response['data']
-
-    const timeSeries = data["Time Series (5min)"];
-
-    return timeSeries
+    return data
+    // const timeSeries = data["Time Series (5min)"];
     // const lastRefreshed = data["Meta Data"]["3. Last Refreshed"];
 
     // // Convert last refreshed time to Date object
